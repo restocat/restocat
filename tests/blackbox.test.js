@@ -3,30 +3,30 @@
  */
 
 var should = require('should')
-  , assert = require('assert')
   , request = require('supertest')
-  , validator = require('express-validator').validator
   , substance = require('./../')
-  , db = require('./extras.js')
-  , Error = require('./../lib/error');
+  , db = require('./extras.js');
 
 describe('Resources', function() {
+  var app;
+
   before(function( done ){
-    db();
-    done();
+    app = substance();
+    app.mongoose.connection.once('open', function(){
+      done();
+    });
   });
 
- /* describe('Default settings', function(){
-    var app = substance();
+  describe('Default settings', function(){
 
-    before(function(done){
+    before(function( done ){
       app.resource('user', {
         name: { type: String, isRequired: true },
         password: String,
         roles: [ String ]
       });
 
-      app.use(Error.errorHandler);
+      app.use(app.Error.errorHandler);
 
       done();
     });
@@ -130,13 +130,12 @@ describe('Resources', function() {
           done();
         });
     });
-  });*/
+
+  });
 
   describe('Add custom transformation', function(){
-    var app = substance();
-
-    before(function(done){
-      app.resource('user', {
+    before(function( done ){
+      app.resource('anotherUser', {
         name: { type: String, isRequired: true },
         password: String,
         roles: [ String ]
@@ -154,21 +153,23 @@ describe('Resources', function() {
           }, 1)
         });
 
-      app.use(Error.errorHandler);
+      app.resource('other', { name: String });
+
+      app.use(app.Error.errorHandler);
 
       done();
     });
 
     it('name should be trimmed and lowered', function(done) {
       request(app)
-        .post('/users')
+        .post('/anotherUsers')
         .send({
           name: '  ICamelCase ',
           password: 123
         })
         .expect(201, function(err, res) {
           if (err) {
-            console.log(res.text);
+            //console.log(res.text);
             throw err;
           }
 
@@ -182,11 +183,11 @@ describe('Resources', function() {
 
     it('result should have etag', function(done) {
       request(app)
-        .get('/users')
+        .get('/anotherusers')
         .send()
         .expect(200, function(err, res) {
           if (err) {
-            console.log(res.text);
+            //console.log(res.text);
             throw err;
           }
 
@@ -196,5 +197,9 @@ describe('Resources', function() {
           done();
         });
     });
+  });
+
+  after(function( done ){
+    app.mongoose.disconnect( done );
   });
 });
