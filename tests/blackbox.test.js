@@ -19,6 +19,8 @@ describe('Resources', function() {
 
   describe('Default settings', function(){
 
+    var user_id;
+
     before(function( done ){
       app.resource('user', {
         name: { type: String, isRequired: true },
@@ -45,6 +47,8 @@ describe('Resources', function() {
 
           res.body.result._id.should.match(db.regexp.id);
           res.body.result.password.should.equal('123');
+
+          user_id = res.body.result._id;
 
           done();
         });
@@ -122,6 +126,39 @@ describe('Resources', function() {
         .post('/users')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .expect(412, function(err, res) {
+          if (err) {
+            console.log(res.text);
+            throw err;
+          }
+
+          done();
+        });
+    });
+
+    it('update', function(done) {
+      request(app)
+        .put('/users/' + user_id)
+        .send({
+          password: 321
+        })
+        .expect(200, function(err, res) {
+          if (err) {
+            console.log(res.text);
+            throw err;
+          }
+
+          res.body.result._id.should.match(db.regexp.id);
+          res.body.result.password.should.equal('321');
+
+          done();
+        });
+    });
+
+    it('delete', function(done) {
+      request(app)
+        .delete('/users/' + user_id)
+        .send()
+        .expect(200, function(err, res) {
           if (err) {
             console.log(res.text);
             throw err;
