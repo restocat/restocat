@@ -5,6 +5,7 @@
 var should = require('should')
   , request = require('supertest')
   , substance = require('./../')
+  , mongoose = substance.mongoose
   , db = require('./extras.js');
 
 describe('Resources', function() {
@@ -12,7 +13,7 @@ describe('Resources', function() {
 
   before(function( done ){
     app = substance();
-    app.mongoose.connection.once('open', function(){
+    mongoose.connection.once('open', function(){
       done();
     });
   });
@@ -28,7 +29,7 @@ describe('Resources', function() {
         roles: [ String ]
       });
 
-      app.use(app.Error.errorHandler);
+      app.use(substance.Error.errorHandler);
 
       done();
     });
@@ -192,7 +193,7 @@ describe('Resources', function() {
 
       app.resource('other', { name: String });
 
-      app.use(app.Error.errorHandler);
+      app.use(substance.Error.errorHandler);
 
       done();
     });
@@ -237,6 +238,6 @@ describe('Resources', function() {
   });
 
   after(function( done ){
-    app.mongoose.disconnect( done );
+    mongoose.disconnect( done );
   });
 });
