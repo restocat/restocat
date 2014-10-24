@@ -5,13 +5,23 @@ Substance.js is a framework for quickly create RESTful APIs with Express.js and 
 
 ## Usage
 
+> Mongoose is required. In terminal: `npm install mongoose --save`
+
 ### Defining resource
 
 
 ```javascript
   
   var substance = require('substancejs')
-    , app = substance();
+    , config = require('./config.json')
+    , modelReview = require('./modelReview')
+    , Schema = require('mongoose').Schema
+    , app = substance({
+      mongoose:{
+        uri: config.uri,
+        options: config.options
+      }
+    });
   
   app.resource( 
     'user',           // resource name
@@ -20,7 +30,34 @@ Substance.js is a framework for quickly create RESTful APIs with Express.js and 
       email: String
     }
   );
-
+  
+  app.resource('place', new Schema({ /* ••• */ }));
+  
+  app.resource('review', modelReview);
+  
+  app.resource('place')
+      .beforeAll( /* passport.js auth */ )
+      .before('create', function( req, res, next ){
+          req.body.author = req.body.editor = req.user;
+          
+          next();
+      })
+      .before('update', function( req, res, next ){
+          req.body.editor = req.user;
+          
+          next();
+      })
+      .after('list', function( req, res, result, next ){
+        this; // context == Resource
+        this._model // == mongoose.model('place');
+      
+        this._model.count(req.query.filters, function(err, countPlaces){
+          result.meta.total = countPlaces;
+          next();
+        });
+      })
+  
+  
   app.listen(3000, function(){
     console.log('Substance listening at http://localhost:3000');
   });
