@@ -1,6 +1,6 @@
 {
   "name": "substancejs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "Chetverikov Maksim",
     "email": "ma.chetverikov@gmail.com"
@@ -21,14 +21,14 @@
     "debug": "~2.1.0",
     "i": "~0.3.2",
     "lodash": "~2.4.1",
-    "async": "~0.9.0",
-    "mongoose": "3.8.16"
+    "async": "~0.9.0"
   },
   "devDependencies": {
     "should": "*",
     "mocha": "*",
     "supertest": "*",
-    "superagent": "*"
+    "superagent": "*",
+    "mongoose": "3.8.18"
   },
   "engines": {
     "node": ">=0.10"

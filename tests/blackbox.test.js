@@ -5,7 +5,7 @@
 var should = require('should')
   , request = require('supertest')
   , substance = require('./../')
-  , mongoose = substance.mongoose
+  , mongoose = require('mongoose')
   , db = require('./extras.js');
 
 describe('Resources', function() {

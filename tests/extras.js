@@ -5,7 +5,7 @@
 
 var _ = require('lodash')
   , async = require('async')
-  , mongoose = require('./../').mongoose
+  , mongoose = require('mongoose')
   , assert = require('assert')
   , ext;
 
