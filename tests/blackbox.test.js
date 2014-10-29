@@ -237,6 +237,32 @@ describe('Resources', function() {
     });
   });
 
+  describe('Rewrite default methods', function(){
+    before(function( done ){
+      app.resource('rewriter', { name: String })
+        .create(function(req, res){
+          res.status(501).send();
+        });
+
+      app.use(substance.Error.errorHandler);
+
+      done();
+    });
+
+    it('should rewrite', function(done) {
+      request(app)
+        .post('/rewriters')
+        .send({})
+        .expect(501, function(err, res) {
+          if (err) {
+            console.log(res.text);
+            throw err;
+          }
+          done();
+        });
+    })
+  });
+
   after(function( done ){
     mongoose.disconnect( done );
   });
