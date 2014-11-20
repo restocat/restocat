@@ -27,7 +27,11 @@ describe('Resources', function() {
         name: { type: String, isRequired: true },
         password: String,
         roles: [ String ]
-      });
+      })
+        .after('delete', function( req, res, result, next ){
+          result = 'DELETE';
+          next( null, result );
+        });
 
       app.use(substance.Error.errorHandler);
 
@@ -164,6 +168,8 @@ describe('Resources', function() {
             console.log(res.text);
             throw err;
           }
+
+          res.text.should.equal('DELETE');
 
           done();
         });
