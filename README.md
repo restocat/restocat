@@ -49,11 +49,11 @@ Substance.js is a framework for quickly create RESTful APIs with Express.js and 
       })
       .after('list', function( req, res, result, next ){
         this; // context == Resource
-        this._model // == mongoose.model('place');
+        this.model // == mongoose.model('place');
       
-        this._model.count(req.query.filters, function(err, countPlaces){
+        this.model.count(req.query.filters, function(err, countPlaces){
           result.meta.total = countPlaces;
-          next();
+          next(null, result);
         });
       })
   
@@ -100,6 +100,12 @@ If you need to validate the input data or to wrap up the output, then you can us
         .afterAll(function( req, res, result, next ){
             next( null, { result: result, count: result.length });
         })
+        
+  // Multi
+  
+  app.resource( 'user' )
+        .before( 'create', 'update', something_func  )
+        .after('list', 'read', func_1, func_2 )
 ```
 
 By default, in Substance has set the following transformers
@@ -115,6 +121,25 @@ By default, in Substance has set the following transformers
 | after | list | Add meta field and count (length of result) in meta field |
 | after | list | Add total field in meta (total count of data by filters) |
 | afterAll | --- | Wrap all result in result field |
+
+## Override default method
+You can override default method:
+
+```javascript
+  app.resource('another')
+        .create( my_create_func ) // override create function. Args req, res, next
+        .read( my_read_func )
+        .list( my_list_func )
+        .update( my_up_func )
+```
+
+## Custom method
+
+```javascript
+  app.resource('review')
+        .method('post /:id/block', method_for_review) // now you have  POST /reviews/:id/block method
+        .before('post /:id/block', before_block) // and hook for custom method
+```
 
 ## Debug
 
