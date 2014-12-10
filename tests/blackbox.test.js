@@ -269,6 +269,35 @@ describe('Resources', function() {
     })
   });
 
+  describe('Custom defaults', function(){
+    before(function( done ){
+      app.resource('foo', { name: String }, {
+        defaults: function( resource ){
+          resource.list(function(req, res, next){
+            res.status(200).send({ ok: true });
+          });
+        }
+      });
+
+      done();
+    });
+
+    it('should rewrite', function(done) {
+      request(app)
+        .get('/foos')
+        .send({})
+        .expect(200, function(err, res) {
+          if (err) {
+            console.log(res.text);
+            throw err;
+          }
+
+          res.body.ok.should.equal(true);
+          done();
+        });
+    })
+  });
+
   after(function( done ){
     mongoose.disconnect( done );
   });

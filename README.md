@@ -141,6 +141,21 @@ You can override default method:
         .before('post /:id/block', before_block) // and hook for custom method
 ```
 
+## Set global methods and hooks by default
+If you want to set for all or for some resources their methods and hooks, you can set options 'defaults'.
+
+```javascript
+    var defaults = function( resource ){   
+            resource.create( MyCreateFunc );
+            resource.beforeAll( MyHookFunc ); 
+        }
+      , app = substance( { ..., defaults: defaults}) // for all resources
+      
+      // OR
+      
+      app.resource('Name', SchemaOrModel, { defaults: defaults }) // for current resource
+```
+
 ## Debug
 
 Substance uses the [debug](https://github.com/visionmedia/debug) module internally to log information about route matches and application mode. To see this information, simply set the DEBUG environment variable to substance:* when launching your app and the debug information will appear on the console.
