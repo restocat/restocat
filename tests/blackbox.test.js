@@ -298,6 +298,29 @@ describe('Resources', function() {
     })
   });
 
+  describe('Clear hooks', function(){
+    before(function( done ){
+      app.resource('boo', { name: String }).clear('afterall');
+
+      done();
+    });
+
+    it('hooks should cleaned ', function(done) {
+      request(app)
+        .get('/boos')
+        .send({})
+        .expect(200, function(err, res) {
+          if (err) {
+            console.log(res.text);
+            throw err;
+          }
+
+          res.body.should.be.an.instanceOf(Array);
+          done();
+        });
+    })
+  });
+
   after(function( done ){
     mongoose.disconnect( done );
   });

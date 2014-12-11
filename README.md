@@ -28,6 +28,10 @@ Substance.js is a framework for quickly create RESTful APIs with Express.js and 
     {                 // resource data schema
       username: String,
       email: String
+    },
+    {
+      defaults: function( resource ){ ... },
+      namespace: undefined  // add base for mount path
     }
   );
   
@@ -154,6 +158,15 @@ If you want to set for all or for some resources their methods and hooks, you ca
       // OR
       
       app.resource('Name', SchemaOrModel, { defaults: defaults }) // for current resource
+```
+
+## Clear hooks
+
+```javascript
+    app.resource('review').clear('before'); // remove all before hooks
+    app.resource('review').clear('beforeall'); // remove all beforeall hooks
+    app.resource('review').clear('before', 'create'); // remove all before create hooks
+    app.resource('review').clear('before', 'put /reviews/:id/photos'); // remove all before custom method hooks
 ```
 
 ## Debug
