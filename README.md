@@ -1,6 +1,8 @@
 Substance.js
 =========
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chetverikov/substance?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Substance.js is a framework for quickly create RESTful APIs with Express.js and Mongoose.js
 
 ## Usage
