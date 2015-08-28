@@ -4,7 +4,6 @@
  */
 
 var _ = require('lodash')
-  , async = require('async')
   , mongoose = require('mongoose')
   , assert = require('assert')
   , ext;
@@ -41,11 +40,11 @@ _.extend( module.exports, {
 });
 
 before(function( done ){
-  console.log('открываем');
-  async.series( [ ext.clearDatabase ], done );
+  console.time('Time of execution: ');
+  ext.clearDatabase( done );
 });
 
 after(function( done ){
-  console.log('закрываем');
-  async.series( [ ext.closeMongoose ], done );
+  console.timeEnd('Time of execution: ');
+  ext.closeMongoose( done );
 });

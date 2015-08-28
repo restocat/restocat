@@ -23,11 +23,12 @@ describe('Resources', function() {
     var user_id;
 
     before(function( done ){
-      app.resource('user', {
-        name: { type: String, isRequired: true },
-        password: String,
-        roles: [ String ]
-      })
+      app
+        .resource('user', {
+          name: { type: String, isRequired: true },
+          password: String,
+          roles: [ String ]
+        })
         .after('delete', function( req, res, result, next ){
           result = 'DELETE';
           next( null, result );
