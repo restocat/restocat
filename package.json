@@ -1,6 +1,6 @@
 {
-  "name": "substancejs",
-  "version": "0.4.0",
+  "name": "restocat",
+  "version": "1.0.0-alpha.1",
   "author": {
     "name": "Chetverikov Maksim",
     "email": "ma.chetverikov@gmail.com"
@@ -9,31 +9,26 @@
     "type": "git",
     "url": "https://github.com/chetverikov/substance"
   },
-  "description": "RESTful API framework based on Express.js",
+  "description": "Small and Crazy RESTful API framework",
   "license": "MIT",
   "scripts": {
     "test": "NODE_ENV=test node_modules/.bin/mocha --async-only tests/**/*.test.js"
   },
   "dependencies": {
-    "body-parser": "~1.13.0",
-    "debug": "~2.2.0",
-    "express": "~4.13.3",
-    "express-validator": "~2.17.0",
-    "i": "~0.3.2",
-    "lodash": "~3.10.1",
+    "catberry-locator": "^2.1.0",
+    "chokidar": "^1.5.0",
+    "glob": "^7.0.3",
     "methods": "~1.1.1",
-    "substancejs-defaults": "0.0.1",
-    "vow": "^0.4.10"
+    "router": "^1.1.4"
   },
   "devDependencies": {
     "should": "*",
     "mocha": "*",
     "supertest": "*",
-    "superagent": "*",
-    "mongoose": "3.8.20"
+    "superagent": "*"
   },
   "engines": {
-    "node": ">=0.10"
+    "node": ">=6"
   },
   "keywords": [
     "json",

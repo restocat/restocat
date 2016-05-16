@@ -1,1 +1,1 @@
-module.exports = require('./lib/substance');
+module.exports = require('./lib/Substance');
