@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const events = require('events');
 const ServiceLocator = require('catberry-locator');
-const CollectionFinder = require('../../lib/CollectionsFinder');
+const CollectionFinder = require('../../lib/finders/CollectionsFinder');
 
 const CASE_PATH = path.join('test', 'cases', 'lib', 'CollectionsFinder');
 
