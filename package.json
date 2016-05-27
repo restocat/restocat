@@ -2,17 +2,22 @@
   "name": "restocat",
   "version": "1.0.0-alpha.5",
   "author": {
-    "name": "Chetverikov Maksim",
+    "name": "Maksim Chetverikov",
     "email": "ma.chetverikov@gmail.com"
   },
+  "homepage": "https://github.com/restocat/restocat",
   "repository": {
     "type": "git",
     "url": "https://github.com/restocat/restocat"
   },
+  "bugs": {
+    "url": "https://github.com/restocat/restocat/issues",
+    "email": "ma.chetverikov@gmail.com"
+  },
   "description": "Small and Crazy REST API framework",
   "license": "MIT",
   "scripts": {
-    "test": "make"
+    "test": "make test"
   },
   "dependencies": {
     "assert-plus": "^1.0.0",
