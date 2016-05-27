@@ -5,7 +5,7 @@
 			"logic": "./logic.js",
 			"additional" : "some"
 		},
-		"path": "test/cases/lib/CollectionsFinder/collections/test1/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test-collection.json"
 	},
 	"cool": {
 		"name": "cool",
@@ -14,7 +14,7 @@
 			"logic": "./logic.js",
 			"additional" : "some2"
 		},
-		"path": "test/cases/lib/CollectionsFinder/collections/test1/test2/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test2/test-collection.json"
 	},
 	"test3": {
 		"name": "test3",
@@ -22,6 +22,6 @@
 			"logic": "./logic.js",
 			"additional" : "some"
 		},
-		"path": "test/cases/lib/CollectionsFinder/collections/test3/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test3/test-collection.json"
 	}
 }

@@ -1,0 +1,10 @@
+[
+  "get / | Index.list",
+  "get /Foo | Foo.list",
+  "get /Foo/:id | Foo.one",
+  "post /Foo | Foo.create",
+  "delete /Foo/:id | Foo.delete",
+  "put /Foo/:id | Foo.update",
+  "get /Bar | Bar.list",
+  "get /Bar/:id | Bar.one"
+]

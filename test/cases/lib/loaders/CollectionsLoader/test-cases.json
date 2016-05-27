@@ -1,0 +1,50 @@
+{
+	"load": [
+		{
+			"name": "should properly load components",
+			"components": {
+				"first-cool": {
+					"name": "first-cool",
+					"path": "test/cases/lib/loaders/CollectionsLoader/first/first.json",
+					"properties": {
+						"logic": "./logic.js"
+					}
+				},
+				"second": {
+					"name": "second",
+					"path": "test/cases/lib/loaders/CollectionsLoader/Second/second.json",
+					"properties": {
+						"logic": "./index.js"
+					}
+				}
+			},
+			"expectedCount": 2
+		},
+		{
+			"name": "should not load if component does not export a constructor or a class",
+			"components": {
+				"error1": {
+					"name": "error1",
+					"path": "test/cases/lib/loaders/CollectionsLoader/Error1/error1.json",
+					"properties": {
+						"logic": "./index.js"
+					}
+				}
+			},
+			"expectedCount": 0
+		},
+		{
+			"name": "should not load if component has no logic file",
+			"components": {
+				"error4": {
+					"name": "error4",
+					"path": "test/cases/lib/loaders/CollectionsLoader/Error4/error4.json",
+					"properties": {
+						"logic": "./index.js"
+					}
+				}
+			},
+			"expectedCount": 0
+		}
+	]
+}
