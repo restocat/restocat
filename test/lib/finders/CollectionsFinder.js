@@ -7,18 +7,19 @@ const events = require('events');
 const ServiceLocator = require('catberry-locator');
 const utils = require('../../utils');
 const CollectionFinder = require('../../../lib/finders/CollectionsFinder');
+const cwd = process.cwd();
 
 const CASE_PATH = path.join('test', 'cases', 'lib', 'finders', 'CollectionsFinder');
 
 const EXPECTED_PATH = path.join(
-  process.cwd(), CASE_PATH, 'expected.json'
+  cwd, CASE_PATH, 'expected.json'
 );
 const EXPECTED = require(EXPECTED_PATH);
 
 /* eslint prefer-arrow-callback:0 */
 /* eslint max-nested-callbacks:0 */
 /* eslint require-jsdoc:0 */
-/*  eslint no-sync: 0 */
+/* eslint no-sync: 0 */
 describe('lib/CollectionsFinder', () => {
   describe('#find', () => {
     it('should find all valid collections', () => {
@@ -33,6 +34,7 @@ describe('lib/CollectionsFinder', () => {
         .find()
         .then(found => assert.deepEqual(found, EXPECTED));
     });
+
     it('should find all valid collections by globs array', () => {
       const locator = createLocator();
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/collections';
@@ -58,53 +60,54 @@ describe('lib/CollectionsFinder', () => {
     it('should recreate collection after change collection.json', () => {
       const locator = createLocator();
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
-      const alreadyPath = path.join(process.cwd(), caseRoot, 'already', 'test-collection.json');
-      const collectionJsonContent = JSON.parse(fs.readFileSync(alreadyPath));
+      const tmpPath = path.normalize(path.join(caseRoot, '../tmp'));
+      const alreadyPath = path.join(cwd, tmpPath, 'already', 'test-collection.json');
+      const fullTmpPath = path.join(cwd, tmpPath);
 
       locator.registerInstance('config', {
         collectionsGlob: [
-          `${caseRoot}/**/test-collection.json`
+          `${tmpPath}/**/test-collection.json`
         ]
       });
 
       const finder = locator.resolve('componentsFinder');
+      let watchers, collections;
 
-      return finder.find()
-        .then(collections => {
+      return promisify(fs.copy)(path.join(cwd, caseRoot), fullTmpPath)
+        .then(() => finder.find())
+        .then(found => {
+          collections = found;
+
           assert.equal(Object.keys(collections).length, 1);
 
           finder.watch();
 
-          const watchers = finder.getWatchers();
-          const defer = Promise.defer();
+          watchers = finder.getWatchers();
 
-          finder.on('add', collection => {
-            try {
+          return eventPromisify(watchers.collectionJson.on, watchers.collectionJson)('ready');
+        })
+        .then(() => {
+          const promise = eventPromisify(finder.on, finder)('add')
+            .then(collection => {
               assert.equal(collection.name, collections[Object.keys(collections)[0]].name);
 
               watchers.collectionJson.close();
               watchers.collections.close();
-
-              defer.resolve();
-            } catch (e) {
-              defer.reject(e);
-            }
-          });
+            });
 
           locator.resolve('events').on('error', error => done(error));
 
-          collectionJsonContent.timestamp = Date.now();
-          fs.writeFile(alreadyPath, JSON.stringify(collectionJsonContent), () => {
-            delete collectionJsonContent.timestamp;
-            fs.writeFileSync(alreadyPath, JSON.stringify(collectionJsonContent));
-          });
+          const collectionJsonContent = JSON.parse(fs.readFileSync(alreadyPath));
 
-          return defer.promise;
-        })
-        .catch(reason => {
-          delete collectionJsonContent.timestamp;
+          collectionJsonContent.timestamp = Date.now();
+
           fs.writeFileSync(alreadyPath, JSON.stringify(collectionJsonContent));
 
+          return promise;
+        })
+        .then(() => fs.removeSync(fullTmpPath))
+        .catch(reason => {
+          fs.removeSync(fullTmpPath);
           throw reason;
         });
     });
@@ -123,33 +126,30 @@ describe('lib/CollectionsFinder', () => {
       });
 
       const finder = locator.resolve('componentsFinder');
+      let collections, watchers;
 
       return finder.find()
-        .then(collections => {
+        .then(found => {
+          collections = found;
+
           assert.equal(Object.keys(collections).length, 1);
 
           finder.watch();
 
-          const watchers = finder.getWatchers();
-          const defer = Promise.defer();
+          watchers = finder.getWatchers();
 
-          finder.on('add', () => {
-            watchers.collectionJson.close();
-            watchers.collections.close();
+          return eventPromisify(watchers.collectionJson.on, watchers.collectionJson)('ready');
+        })
+        .then(() => {
+          const promise = eventPromisify(finder.on, finder)('add')
+            .then(() => {
+              watchers.collectionJson.close();
+              watchers.collections.close();
 
-            finder.find()
-              .then(collections => {
-                assert.equal(Object.keys(collections).length, 2);
-                defer.resolve();
-              })
-              .catch(reason => defer.reject(reason));
-          });
+              return finder.find().then(collections => assert.equal(Object.keys(collections).length, 2));
+            });
 
-          locator.resolve('events').on('error', reason => defer.reject(reason));
-
-          fs.copy(fullPathAnother, fullPathNew);
-
-          return defer.promise;
+          return Promise.all([promisify(fs.copy)(fullPathAnother, fullPathNew), promise]);
         })
         .then(() => fs.removeSync(fullPathNew))
         .catch(reason => {
@@ -173,34 +173,44 @@ describe('lib/CollectionsFinder', () => {
       });
 
       const finder = locator.resolve('componentsFinder');
+      let collections, watchers;
 
       return finder.find()
-        .then(collections => {
+        .then(found => {
+          collections = found;
+
           assert.equal(Object.keys(collections).length, 1);
 
           finder.watch();
 
-          const watchers = finder.getWatchers();
-          const defer = Promise.defer();
+          watchers = finder.getWatchers();
 
-          locator.resolve('events').on('warn', message => {
-            watchers.collectionJson.close();
-            watchers.collections.close();
+          return Promise.all([
+            eventPromisify(watchers.collectionJson.on, watchers.collectionJson)('ready'),
+            eventPromisify(watchers.collections.on, watchers.collections)('ready')
+          ]);
+        })
+        .then(() => {
+          const events = locator.resolve('events');
 
-            finder.find()
-              .then(collections => {
-                assert.notEqual(-1, message.indexOf('skipping'));
-                assert.equal(Object.keys(collections).length, 2);
-                defer.resolve();
-              })
-              .catch(reason => defer.reject(reason));
-          });
-          locator.resolve('events').on('error', reason => defer.reject(reason));
+          const promise = eventPromisify(events.on, events)('warn')
+            .then(message => {
+              watchers.collectionJson.close();
+              watchers.collections.close();
 
-          fs.copy(fullPathAnother, fullPathNew);
-          fs.copy(fullPathAnother, fullPathNewDuplicate);
+              return finder.find()
+                .then(collections => {
+                  assert.notEqual(-1, message.indexOf('skipping'));
+                  assert.equal(Object.keys(collections).length, 2);
+                });
+            });
 
-          return defer.promise;
+          return Promise.all([
+            promisify(fs.copy)(fullPathAnother, fullPathNew),
+            promisify(fs.copy)(fullPathAnother, fullPathNewDuplicate),
+            promise
+          ]);
+
         })
         .then(() => {
           fs.removeSync(fullPathNew);
@@ -215,6 +225,38 @@ describe('lib/CollectionsFinder', () => {
     });
   });
 });
+
+function promisify(original, thisArg) {
+  return (...args) => {
+    const def = Promise.defer();
+
+    args.push((err, ...args) => err ? def.reject(err) : def.resolve(args));
+
+    if (thisArg) {
+      original.apply(thisArg, args);
+    } else {
+      original(...args);
+    }
+
+    return def.promise;
+  };
+}
+
+function eventPromisify(original, thisArg) {
+  return (...args) => {
+    const def = Promise.defer();
+
+    args.push((...args) => def.resolve(...args));
+
+    if (thisArg) {
+      original.apply(thisArg, args);
+    } else {
+      original(...args);
+    }
+
+    return def.promise;
+  };
+}
 
 function createLocator() {
   const locator = new ServiceLocator();
