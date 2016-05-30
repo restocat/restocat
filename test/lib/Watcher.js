@@ -408,9 +408,10 @@ describe('lib/Watcher', () => {
       const events = locator.resolve('events');
       let collections;
       const onCollectionsLoaded = new Promise(fulfill => events.on('allCollectionsLoaded', fulfill));
+      const onReadyWatchers = new Promise(fulfill => events.on('readyWatchers', fulfill));
 
       return promisify(fs.copy)(caseRoot, tmpPath)
-        .then(() => loader.load())
+        .then(() => Promise.all([loader.load(), onReadyWatchers]))
         .then(() => onCollectionsLoaded)
         .then(loaded => {
           assert.equal(Object.keys(loaded).length, 1);
