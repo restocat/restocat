@@ -1,6 +1,6 @@
 SOURCES = lib/*.js
 
-TESTS = test/lib/**/*.js
+TESTS = test/lib/*.js test/lib/**/*.js
 
 all: lint test
 
