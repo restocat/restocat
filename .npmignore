@@ -12,3 +12,4 @@ node_modules
 .Trashes
 ehthumbs.db
 Thumbs.db
+__tmp__*__*
