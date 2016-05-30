@@ -382,7 +382,7 @@ describe('lib/Watcher', () => {
       const events = locator.resolve('events');
 
       events.on('error', done);
-      events.on('collectionsWatchReady', watchers => {
+      events.on('readyWatchers', watchers => {
         watchers.forEach(watcher => watcher.close());
         done();
       });
@@ -407,7 +407,7 @@ describe('lib/Watcher', () => {
       const watcher = locator.resolve('watcher');
       const events = locator.resolve('events');
       let collections;
-      const onCollectionsLoaded = new Promise(fulfill => events.on('collectionsLoaded', fulfill));
+      const onCollectionsLoaded = new Promise(fulfill => events.on('allCollectionsLoaded', fulfill));
 
       return promisify(fs.copy)(caseRoot, tmpPath)
         .then(() => loader.load())
@@ -452,7 +452,7 @@ describe('lib/Watcher', () => {
       const watcher = locator.resolve('watcher');
       const events = locator.resolve('events');
 
-      const onWatchReady = new Promise(fulfill => events.on('collectionsWatchReady', fulfill));
+      const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
 
       return promisify(fs.copy)(caseRoot, tmpPath)
         .then(() => loader.load())
