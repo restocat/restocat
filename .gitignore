@@ -3,3 +3,5 @@ coverage
 *.log
 node_modules
 test/**/tmp
+__tmp__*__*
+.DS_Store
