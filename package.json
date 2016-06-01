@@ -1,6 +1,6 @@
 {
   "name": "restocat",
-  "version": "1.0.0-RC",
+  "version": "1.0.0-RC2",
   "author": {
     "name": "Maksim Chetverikov",
     "email": "ma.chetverikov@gmail.com"
@@ -20,7 +20,6 @@
     "test": "make test"
   },
   "dependencies": {
-    "assert-plus": "^1.0.0",
     "catberry-locator": "^2.1.0",
     "catberry-uri": "^3.1.0",
     "chokidar": "^1.5.0",

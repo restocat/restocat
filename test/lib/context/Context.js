@@ -50,4 +50,38 @@ describe('lib/context/Context', () => {
 
     assert.deepEqual(context.actions.notFound, {message: 'Document not found', code: 'NF001'});
   });
+
+  it('#redirect', () => {
+    const factory = new ContextFactory(locator);
+    const args = [
+      {
+        getLocation: () => {},
+        getHeader: () => {}
+      },
+      'response'
+    ];
+
+    const context = factory.create(...args);
+
+    context.redirect('http://my.foo.bar', 302);
+
+    assert.deepEqual(context.actions.redirect, {uri: 'http://my.foo.bar', statusCode: 302});
+  });
+
+  it('#notSend', () => {
+    const factory = new ContextFactory(locator);
+    const args = [
+      {
+        getLocation: () => {},
+        getHeader: () => {}
+      },
+      'response'
+    ];
+
+    const context = factory.create(...args);
+
+    context.notSend();
+
+    assert.deepEqual(context.actions.notSend, true);
+  });
 });

@@ -3,7 +3,7 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
-const events = require('events');
+const EventEmitter = require('events').EventEmitter;
 const ServiceLocator = require('catberry-locator');
 const utils = require('../utils');
 const CollectionsFinder = require('../../lib/finders/CollectionsFinder');
@@ -12,6 +12,7 @@ const promisify = require('../../lib/helpers/promises').promisify;
 const Watcher = require('../../lib/Watcher');
 
 const copy = promisify(fs.copy);
+
 const remove = promisify(fs.remove);
 const writeFile = promisify(fs.writeFile);
 
@@ -21,13 +22,41 @@ const writeFile = promisify(fs.writeFile);
 /* eslint no-sync: 0 */
 describe('lib/Watcher', () => {
 
+  it('#initialization', done => {
+    const locator = new ServiceLocator();
+    locator.registerInstance('serviceLocator', locator);
+    locator.registerInstance('events', new EventEmitter());
+    locator.register('collectionsLoader', CollectionsLoader, true);
+    locator.register('collectionsFinder', CollectionsFinder, true);
+    locator.register('watcher', Watcher, true);
+
+    locator.registerInstance('config', {
+      isRelease: false,
+      collectionsGlob: [
+        'test/cases/lib/finders/CollectionsFinder/watch/**/test-collection.json'
+      ]
+    });
+
+    const events = locator.resolve('events');
+
+    locator.resolve('watcher');
+
+    events.on('error', done);
+    events.on('readyWatchers', watchers => {
+      watchers.forEach(watcher => watcher.close());
+      done();
+    });
+
+    locator.resolve('collectionsLoader').load();
+  });
+
   describe('#watchCollectionJsonFiles', () => {
     let locator;
 
     beforeEach(() => {
       locator = new ServiceLocator();
       locator.registerInstance('serviceLocator', locator);
-      locator.registerInstance('events', new events.EventEmitter());
+      locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
       locator.register('watcher', Watcher, true);
     });
@@ -193,7 +222,7 @@ describe('lib/Watcher', () => {
     beforeEach(() => {
       locator = new ServiceLocator();
       locator.registerInstance('serviceLocator', locator);
-      locator.registerInstance('events', new events.EventEmitter());
+      locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
       locator.register('watcher', Watcher, true);
     });
@@ -256,7 +285,6 @@ describe('lib/Watcher', () => {
       const tmpPath = getTemporary(caseRoot);
       const anotherPath = path.join(tmpPath, 'already', 'AnotherForAlready.js');
       const copyPath = path.join(tmpPath, 'customs', 'AnotherForAlready.js');
-      const fullTmpPath = tmpPath;
 
       locator.registerInstance('config', {
         collectionsGlob: [
@@ -269,7 +297,8 @@ describe('lib/Watcher', () => {
 
       let collections;
 
-      return copy(caseRoot, fullTmpPath)
+      return copy(caseRoot, tmpPath)
+        .then(() => utils.wait(200))
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -283,7 +312,7 @@ describe('lib/Watcher', () => {
             logicWatcher.on('error', reject);
             watcher.on('change', data => {
               logicWatcher.close();
-              utils.wait(10)
+              utils.wait(20)
                 .then(() => {
                   assert.equal(data.filename, anotherPath);
                   fulfill();
@@ -294,9 +323,9 @@ describe('lib/Watcher', () => {
 
           return Promise.all([copy(copyPath, anotherPath), promise]);
         })
-        .then(() => remove(fullTmpPath))
+        .then(() => remove(tmpPath))
         .catch(reason => {
-          fs.removeSync(fullTmpPath);
+          fs.removeSync(tmpPath);
           throw reason;
         });
     });
@@ -356,7 +385,7 @@ describe('lib/Watcher', () => {
     beforeEach(() => {
       locator = new ServiceLocator();
       locator.registerInstance('serviceLocator', locator);
-      locator.registerInstance('events', new events.EventEmitter());
+      locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
       locator.register('collectionsLoader', CollectionsLoader, true);
       locator.register('watcher', Watcher, true);
@@ -438,7 +467,7 @@ describe('lib/Watcher', () => {
         });
     });
 
-    it('should reload collection on change', () => {
+    it('should reload collection on change in logic file', () => {
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
       const tmpPath = getTemporary(caseRoot);
       const alreadyPath = path.join(tmpPath, 'already', 'index.js');
@@ -452,8 +481,10 @@ describe('lib/Watcher', () => {
       const events = locator.resolve('events');
 
       const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
+      const changePromise = new Promise(fulfill => watcher.on('change', fulfill));
 
       return copy(caseRoot, tmpPath)
+        .then(() => utils.wait(20))
         .then(() => loader.load())
         .then(() => onWatchReady)
         .then(watchers => {
@@ -477,6 +508,54 @@ describe('lib/Watcher', () => {
 
           let collectionJsonContent = fs.readFileSync(alreadyPath).toString();
           collectionJsonContent = collectionJsonContent.replace(/blablabla/, 'foo');
+
+          return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise, changePromise]);
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
+          throw reason;
+        });
+    });
+
+    it('should reload collection on change in collection.json', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
+
+      locator.registerInstance('config', {
+        collectionsGlob: `${tmpPath}/**/test-collection.json`
+      });
+
+      const loader = locator.resolve('collectionsLoader');
+      const watcher = locator.resolve('watcher');
+      const events = locator.resolve('events');
+
+      const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
+
+      return copy(caseRoot, tmpPath)
+        .then(utils.wait(30))
+        .then(() => loader.load())
+        .then(() => onWatchReady)
+        .then(watchers => {
+          const promise = new Promise((fulfill, reject) => {
+            events.on('collectionLoaded', collection => {
+              if (collection.name !== 'already') {
+                return;
+              }
+
+              try {
+                watchers.forEach(watcher => watcher.close());
+                assert.equal(collection.properties.additional, 'foo');
+                fulfill();
+              } catch (e) {
+                reject(e);
+              }
+            });
+          });
+
+          let collectionJsonContent = fs.readFileSync(alreadyPath).toString();
+          collectionJsonContent = collectionJsonContent.replace(/some2/, 'foo');
 
           return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise]);
         })
