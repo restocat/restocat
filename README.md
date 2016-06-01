@@ -73,8 +73,10 @@ Restocat sets as the property `$context` for every instance of each `collection`
 * `this.$context.referrer` – the current [URI](https://github.com/catberry/catberry-uri) object that contains the current referrer.
 
 * `this.$context.locator` – the [Service Locator](https://github.com/catberry/catberry-locator) of the application.
-* `this.$context.forward('collection_name', 'handle_name')` – forwarding the current request to a other collection. This method is useful for creating a sub-collection flow 
+* `this.$context.forward(collection_name:String, handle_name:String)` – forwarding the current request to a other collection. This method is useful for creating a sub-collection flow 
 * `this.$context.notFound()` - correct 404 response from the server
+* `this.$context.redirect(uri:String, statusCode:Number)` - correct http redirect
+* `this.$context.notSend()` - a message to restocat what to call the send method is not necessary, we'll do it. **Attention! It can not be caused by formatters and errorHandler**
 
 # Events
 
@@ -114,6 +116,7 @@ Here is a list of Restocat events:
 | collectionLoaded | each component is loaded | `{name: String, properties: Object, constructor: function}` |
 | allCollectionsLoaded | all components are loaded | Loaded components by their names |
 | incomingMessage | Request message | `IncomingMessage` |
+| responseServer | Response server | `ResponseServer`, `IncomingMessage` |
 
 # Request API (IncomingMessage)
 Wraps all of the node [http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage) APIs, events and properties, plus the following.
