@@ -5,7 +5,9 @@
 			"logic": "./logic.js",
 			"additional" : "some"
 		},
-		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test-collection.json",
+		"directory": "test/cases/lib/finders/CollectionsFinder/collections/test1",
+		"logicFile": "test/cases/lib/finders/CollectionsFinder/collections/test1/logic.js"
 	},
 	"cool": {
 		"name": "cool",
@@ -14,7 +16,9 @@
 			"logic": "./logic.js",
 			"additional" : "some2"
 		},
-		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test2/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test1/test2/test-collection.json",
+		"directory": "test/cases/lib/finders/CollectionsFinder/collections/test1/test2",
+		"logicFile": "test/cases/lib/finders/CollectionsFinder/collections/test1/test2/logic.js"
 	},
 	"test3": {
 		"name": "test3",
@@ -22,6 +26,8 @@
 			"logic": "./logic.js",
 			"additional" : "some"
 		},
-		"path": "test/cases/lib/finders/CollectionsFinder/collections/test3/test-collection.json"
+		"path": "test/cases/lib/finders/CollectionsFinder/collections/test3/test-collection.json",
+		"directory": "test/cases/lib/finders/CollectionsFinder/collections/test3",
+		"logicFile": "test/cases/lib/finders/CollectionsFinder/collections/test3/logic.js"
 	}
 }
