@@ -1,6 +1,6 @@
 {
   "name": "restocat",
-  "version": "1.0.0-RC3",
+  "version": "1.0.0",
   "author": {
     "name": "Maksim Chetverikov",
     "email": "ma.chetverikov@gmail.com"
@@ -16,8 +16,14 @@
   },
   "description": "Small and Crazy REST API framework",
   "license": "MIT",
+  "contributors": [
+    {
+      "name": "Maksim Chetverikov",
+      "email": "ma.chetverikov@gmail.com"
+    }
+  ],
   "scripts": {
-    "test": "make test"
+    "test": "make"
   },
   "dependencies": {
     "catberry-locator": "^2.1.0",
@@ -41,12 +47,18 @@
   },
   "main": "lib/Restocat.js",
   "keywords": [
+    "framework",
+    "rest",
+    "restful",
+    "restless",
     "json",
     "api",
     "jsonapi",
     "json-api",
-    "framework",
-    "rest",
-    "restful"
+    "collection",
+    "resources",
+    "connect",
+    "express",
+    "middleware"
   ]
 }
