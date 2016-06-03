@@ -1,4 +1,4 @@
-SOURCES = lib/*.js
+SOURCES = lib/**/*.js
 
 TESTS = test/lib/*.js test/lib/**/*.js
 

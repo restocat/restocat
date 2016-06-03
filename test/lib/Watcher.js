@@ -23,6 +23,7 @@ const writeFile = promisify(fs.writeFile);
 /* eslint max-nested-callbacks:0 */
 /* eslint require-jsdoc:0 */
 /* eslint no-sync: 0 */
+/* eslint no-underscore-dangle: 0 */
 describe('lib/Watcher', () => {
 
   it('#initialization', done => {
@@ -757,10 +758,10 @@ describe('lib/Watcher', () => {
 });
 
 /**
- * Temporary
+ * Path temporary folder
  *
- * @params {string} root
- * @returns {string} Name of temporary folder
+ * @param {String} root Base path
+ * @returns {String} path of temporary folder
  */
 function getTemporary(root) {
   const rand = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
