@@ -13,6 +13,9 @@ const Watcher = require('../../lib/Watcher');
 
 const copy = promisify(fs.copy);
 
+// Sometimes the promise is resolved before fs is ready
+const copyWithDelay = (from, to, delay = 20) => copy(from, to).then(() => utils.wait(delay));
+
 const remove = promisify(fs.remove);
 const writeFile = promisify(fs.writeFile);
 
@@ -20,6 +23,7 @@ const writeFile = promisify(fs.writeFile);
 /* eslint max-nested-callbacks:0 */
 /* eslint require-jsdoc:0 */
 /* eslint no-sync: 0 */
+/* eslint no-underscore-dangle: 0 */
 describe('lib/Watcher', () => {
 
   it('#initialization', done => {
@@ -61,6 +65,9 @@ describe('lib/Watcher', () => {
       locator.register('watcher', Watcher, true);
     });
 
+    /**
+     * Watcher emit unlink, add
+     */
     it('should recreate collection after change collection.json', () => {
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
       const tmpPath = getTemporary(caseRoot);
@@ -75,10 +82,17 @@ describe('lib/Watcher', () => {
 
       const finder = locator.resolve('collectionsFinder');
       const watcher = locator.resolve('watcher');
+      const promiseUnlink = new Promise(fulfill => watcher.on('unlink', fulfill));
+      const promiseAdd = new Promise(fulfill => {
+        watcher.on('add', collection => {
+          assert.equal(collection.name, collections[Object.keys(collections)[0]].name);
+          fulfill();
+        });
+      });
 
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -88,21 +102,12 @@ describe('lib/Watcher', () => {
           return watcher.watchCollectionJsonFiles();
         })
         .then(jsonWatcher => {
-          const promise = new Promise((fulfill, reject) => {
-            jsonWatcher.on('error', reject);
-            watcher.on('add', collection => {
-              assert.equal(collection.name, collections[Object.keys(collections)[0]].name);
-
-              jsonWatcher.close();
-
-              fulfill();
-            });
-          });
-
           const collectionJsonContent = JSON.parse(fs.readFileSync(alreadyPath));
           collectionJsonContent.timestamp = Date.now();
 
-          return Promise.all([writeFile(alreadyPath, JSON.stringify(collectionJsonContent)), promise]);
+          return Promise
+            .all([writeFile(alreadyPath, JSON.stringify(collectionJsonContent)), promiseAdd, promiseUnlink])
+            .then(() => jsonWatcher.close());
         })
         .then(() => remove(tmpPath))
         .catch(reason => {
@@ -111,6 +116,9 @@ describe('lib/Watcher', () => {
         });
     });
 
+    /**
+     * Watcher emit add
+     */
     it('should add new collection', () => {
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
       const tmpPath = getTemporary(caseRoot);
@@ -128,7 +136,7 @@ describe('lib/Watcher', () => {
       const watcher = locator.resolve('watcher');
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -138,8 +146,7 @@ describe('lib/Watcher', () => {
           return watcher.watchCollectionJsonFiles();
         })
         .then(jsonWatcher => {
-          const promise = new Promise((fulfill, reject) => {
-            jsonWatcher.once('error', reject);
+          const promise = new Promise(fulfill => {
             jsonWatcher.once('add', () => {
               jsonWatcher.close();
 
@@ -147,7 +154,7 @@ describe('lib/Watcher', () => {
             });
           });
 
-          return Promise.all([copy(anotherCollection, fullPathNew), promise]);
+          return Promise.all([copyWithDelay(anotherCollection, fullPathNew), promise]);
         })
         .then(data => assert.equal(Object.keys(data[1]).length, 2))
         .then(() => remove(tmpPath))
@@ -157,6 +164,9 @@ describe('lib/Watcher', () => {
         });
     });
 
+    /**
+     * Watcher emit warn to global event bus
+     */
     it('skip collection with equal name', () => {
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
       const tmpPath = getTemporary(caseRoot);
@@ -175,7 +185,7 @@ describe('lib/Watcher', () => {
 
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -200,17 +210,70 @@ describe('lib/Watcher', () => {
             .then(() => finder.find().then(collections => assert.equal(Object.keys(collections).length, 2)));
 
           return Promise.all([
-            copy(anotherCollection, fullPathNew),
-            copy(anotherCollection, fullPathNewDuplicate),
+            copyWithDelay(anotherCollection, fullPathNew),
+            copyWithDelay(anotherCollection, fullPathNewDuplicate),
             promise
           ]);
 
         })
-        .then(() => Promise.all([remove(fullPathNew), remove(fullPathNewDuplicate)]))
+        .then(() => remove(tmpPath))
         .catch(reason => {
           fs.removeSync(fullPathNew);
           fs.removeSync(fullPathNewDuplicate);
 
+          throw reason;
+        });
+    });
+
+    it('skip collection with invalid collection.json', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
+      const events = locator.resolve('events');
+
+      locator.registerInstance('config', {
+        isRelease: true,
+        collectionsGlob: [
+          `${tmpPath}/**/test-collection.json`
+        ]
+      });
+
+      const finder = locator.resolve('collectionsFinder');
+      const watcher = locator.resolve('watcher');
+      const promiseError = new Promise((fulfill, reject) => {
+        events.on('error', error => {
+          try {
+            assert.notEqual(String(error).indexOf('test-collection.json: Unexpected token \''), -1);
+          } catch (e) {
+            reject(e);
+          }
+
+          fulfill();
+        });
+      });
+
+      let collections;
+
+      return copyWithDelay(caseRoot, tmpPath)
+        .then(() => finder.find())
+        .then(found => {
+          collections = found;
+
+          assert.equal(Object.keys(collections).length, 1);
+
+          return watcher.watchCollectionJsonFiles();
+        })
+        .then(jsonWatcher => {
+          let collectionJsonContent = fs.readFileSync(alreadyPath);
+          collectionJsonContent = collectionJsonContent.toString().replace(/\"/, '\'');
+
+          return Promise
+            .all([writeFile(alreadyPath, collectionJsonContent), promiseError])
+            .then(() => jsonWatcher.close());
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
           throw reason;
         });
     });
@@ -243,7 +306,7 @@ describe('lib/Watcher', () => {
 
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -297,7 +360,7 @@ describe('lib/Watcher', () => {
 
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => utils.wait(200))
         .then(() => finder.find())
         .then(found => {
@@ -321,7 +384,7 @@ describe('lib/Watcher', () => {
             });
           });
 
-          return Promise.all([copy(copyPath, anotherPath), promise]);
+          return Promise.all([copyWithDelay(copyPath, anotherPath), promise]);
         })
         .then(() => remove(tmpPath))
         .catch(reason => {
@@ -346,7 +409,7 @@ describe('lib/Watcher', () => {
 
       let collections;
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => finder.find())
         .then(found => {
           collections = found;
@@ -437,7 +500,7 @@ describe('lib/Watcher', () => {
         });
       });
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => Promise.all([loader.load(), onReadyWatchers]))
         .then(() => onCollectionsLoaded)
         .then(loaded => {
@@ -458,7 +521,7 @@ describe('lib/Watcher', () => {
             });
           });
 
-          return Promise.all([copy(anotherCollection, fullPathNew), promise]);
+          return Promise.all([copyWithDelay(anotherCollection, fullPathNew), promise]);
         })
         .then(() => remove(tmpPath))
         .catch(reason => {
@@ -483,7 +546,7 @@ describe('lib/Watcher', () => {
       const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
       const changePromise = new Promise(fulfill => watcher.on('change', fulfill));
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(() => utils.wait(20))
         .then(() => loader.load())
         .then(() => onWatchReady)
@@ -533,7 +596,7 @@ describe('lib/Watcher', () => {
 
       const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
 
-      return copy(caseRoot, tmpPath)
+      return copyWithDelay(caseRoot, tmpPath)
         .then(utils.wait(30))
         .then(() => loader.load())
         .then(() => onWatchReady)
@@ -565,14 +628,140 @@ describe('lib/Watcher', () => {
           throw reason;
         });
     });
+
+    it('should remove collection on unlink collection.json', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
+
+      locator.registerInstance('config', {
+        collectionsGlob: `${tmpPath}/**/test-collection.json`
+      });
+
+      const loader = locator.resolve('collectionsLoader');
+      const watcher = locator.resolve('watcher');
+      const events = locator.resolve('events');
+
+      const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
+
+      return copyWithDelay(caseRoot, tmpPath)
+        .then(utils.wait(30))
+        .then(() => loader.load())
+        .then(() => onWatchReady)
+        .then(watchers => {
+          const promise = new Promise((fulfill, reject) => {
+            watcher.on('unlink', collection => {
+              if (collection.name !== 'already') {
+                return;
+              }
+
+              try {
+                watchers.forEach(watcher => watcher.close());
+                assert.equal(Object.keys(loader._loadedCollections).length, 0);
+                fulfill();
+              } catch (e) {
+                reject(e);
+              }
+            });
+          });
+
+          return Promise.all([remove(alreadyPath), promise]);
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
+          throw reason;
+        });
+    });
+
+    it('should skip collection on invalid change in collection.json', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
+
+      locator.registerInstance('config', {
+        collectionsGlob: `${tmpPath}/**/test-collection.json`
+      });
+
+      const loader = locator.resolve('collectionsLoader');
+      const watcher = locator.resolve('watcher');
+      const events = locator.resolve('events');
+
+      const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
+      const onError = new Promise(fulfill => events.on('error', error => {
+        assert.notEqual(String(error).indexOf('test-collection.json: Unexpected token \''), -1);
+        fulfill();
+      }));
+
+      return copyWithDelay(caseRoot, tmpPath, 50)
+        .then(() => loader.load())
+        .then(() => onWatchReady)
+        .then(watchers => {
+          const onChange = new Promise(fulfill => watchers[0].on('change', () => fulfill()));
+          const promise = onChange
+            .then(() => onError)
+            .then(() => assert.equal(Object.keys(loader._loadedCollections).length, 0))
+            .then(() => watchers.forEach(watcher => watcher.close()));
+
+          let collectionJsonContent = fs.readFileSync(alreadyPath).toString();
+          collectionJsonContent = collectionJsonContent.replace(/"/, '\'');
+
+          return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise]);
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
+          throw reason;
+        });
+    });
+
+    it('should skip collection on invalid change in logic file', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'index.js');
+
+      locator.registerInstance('config', {
+        collectionsGlob: `${tmpPath}/**/test-collection.json`
+      });
+
+      const loader = locator.resolve('collectionsLoader');
+      const watcher = locator.resolve('watcher');
+      const events = locator.resolve('events');
+
+      const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
+      const onError = new Promise(fulfill => events.on('error', error => {
+        assert.notEqual(String(error).indexOf('Unexpected token ILLEGAL'), -1);
+        assert.equal(Object.keys(loader._loadedCollections).length, 0);
+        fulfill();
+      }));
+
+      return copyWithDelay(caseRoot, tmpPath)
+        .then(() => loader.load())
+        .then(() => onWatchReady)
+        .then(watchers => {
+          const promise = onError.then(() => {
+            watchers.forEach(watcher => watcher.close());
+          });
+
+          let collectionJsonContent = fs.readFileSync(alreadyPath).toString();
+          collectionJsonContent = collectionJsonContent.replace(/{/, '\'');
+
+          return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise]);
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
+          throw reason;
+        });
+    });
   });
 });
 
 /**
- * Temporary
+ * Path temporary folder
  *
- * @params {string} root
- * @returns {string} Name of temporary folder
+ * @param {String} root Base path
+ * @returns {String} path of temporary folder
  */
 function getTemporary(root) {
   const rand = Math.floor(Math.random() * (100 - 1 + 1)) + 1;

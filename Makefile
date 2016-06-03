@@ -1,4 +1,4 @@
-SOURCES = lib/*.js
+SOURCES = lib/**/*.js
 
 TESTS = test/lib/*.js test/lib/**/*.js
 
@@ -6,7 +6,10 @@ all: lint test
 
 lint:
 	@echo "Running code quality tests..."
-	@NODE_ENV=test ./node_modules/.bin/eslint $(SOURCES) $(TESTS)
+	./node_modules/.bin/eslint $(SOURCES) $(TESTS)
+
+lint-fix:
+	./node_modules/.bin/eslint $(SOURCES) $(TESTS) --fix
 
 test:
 ifeq ($(TRAVIS),true)
