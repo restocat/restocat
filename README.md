@@ -118,6 +118,61 @@ Here is a list of Restocat events:
 | incomingMessage | Request message | `IncomingMessage` |
 | responseServer | Response server | `ResponseServer`, `IncomingMessage` |
 
+# Content Negotiation
+
+If you're not using $context.notSend() Restocat will automatically select the content-type to respond with, 
+by finding the first registered formatter defined.
+Also, note that if a content-type can't be negotiated, the default is `application/octet-stream`. Of course, you can always explicitly set the content-type:
+
+```javascript
+
+$context.response.setHeader('content-type', 'application/vnd.application+json');
+$context.response.send({hello: 'world'});
+
+```
+
+Note that there are typically at least three content-types supported by Restocat (json, text and binary). 
+When you override or append to this, the "priority" might change; to ensure that the priority is set to what you want, 
+you should set a `q`-value on your formatter definitions, which will ensure sorting happens the way you want
+
+So, if you are using the $context.notSend() and send the data manually, you should independently obtain and to use a formatter:
+
+```javascript
+
+const formatterProvider = this._serviceLocator.resolve('formatterProvider');
+const formatter = formatterProvider.getFormatter(this.$context);
+
+Promise.resolve(() => formatter(this.$context, myContent))
+    .then(content => this.$context.resposne.send(content));
+
+```
+
+
+## Formatters
+
+You can add additional formatters to Restocat:
+
+```javascript
+
+const Restocat = require('restocat');
+const cat = new Restocat();
+const server = cat.createServer();
+
+server.register('formatter', {
+    
+  // context - current context with request and response; data - data for response
+  'text/plain; q=0.3': (context, data) => {
+    const string = String(data);
+
+    context.response.setHeader('Content-Length', Buffer.byteLength(string));
+    context.response.setHeader('X-FORMATTER', 'CUSTOM');
+
+    return string;
+  }
+});
+
+```
+
 # Request API (IncomingMessage)
 Wraps all of the node [http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage) APIs, events and properties, plus the following.
 
