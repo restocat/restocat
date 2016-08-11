@@ -79,6 +79,11 @@ Restocat sets as the property `$context` for every instance of each `collection`
 * `this.$context.redirect(uri:String, statusCode:Number)` - correct http redirect
 * `this.$context.notSend()` - a message to restocat what to call the send method is not necessary, we'll do it. **Attention! It can not be caused by formatters and errorHandler**
 
+* `this.$context.name` - name of current collection
+* `this.$context.properties` - properties from `collection.json` for current collection
+* `this.$context.handleName` - handler name for current endpoint
+* `this.$context.state` - the keys found in the path
+
 # Events
 
 There are two ways of listening to a Restocat event:
