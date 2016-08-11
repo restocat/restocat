@@ -4,6 +4,7 @@ Restocat
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/restocat/restocat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Travis CI](https://travis-ci.org/restocat/restocat.svg?branch=master)](https://travis-ci.org/restocat/restocat)
 [![codecov](https://codecov.io/gh/restocat/restocat/coverage.svg)](https://codecov.io/gh/restocat/restocat)
+[![Codeclimate](https://codeclimate.com/github/restocat/restocat/badges/gpa.svg)](https://codeclimate.com/github/restocat/restocat)
 
 
 Restocat is a framework for quickly create REST APIs
@@ -77,6 +78,11 @@ Restocat sets as the property `$context` for every instance of each `collection`
 * `this.$context.notFound()` - correct 404 response from the server
 * `this.$context.redirect(uri:String, statusCode:Number)` - correct http redirect
 * `this.$context.notSend()` - a message to restocat what to call the send method is not necessary, we'll do it. **Attention! It can not be caused by formatters and errorHandler**
+
+* `this.$context.name` - name of current collection
+* `this.$context.properties` - properties from `collection.json` for current collection
+* `this.$context.handleName` - handler name for current endpoint
+* `this.$context.state` - the keys found in the path
 
 # Events
 
