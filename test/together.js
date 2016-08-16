@@ -24,12 +24,82 @@ describe('Server test', () => {
     });
 
     restocat.locator.registerInstance('definedRoutes', require(`${serverPath}/routes`));
-    restocat.events.on('error', err => {});
+    restocat.events.on('error', () => {});
 
     server = restocat.createServer();
   });
 
   describe('Forrmatter', () => {
+    it('JSON formatter', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/')
+            .expect('Content-Type', 'application/json')
+            .expect(200)
+        );
+    });
+
+    it('JSON formatter: error', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect('Content-Type', 'application/json')
+            .expect(500)
+        );
+    });
+
+    it('Text formatter', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/')
+            .set('Accept', 'text/plain')
+            .expect('Content-Type', 'text/plain')
+            .expect(200)
+        );
+    });
+
+    it('Text formatter: error', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .set('Accept', 'text/plain')
+            .expect('Content-Type', 'text/plain')
+            .expect(500)
+        );
+    });
+
+    it('Binary formatter', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/')
+            .set('Accept', 'application/octet-stream')
+            .expect('Content-Type', 'application/octet-stream')
+            .expect(200)
+        );
+    });
+
+    it('Binary formatter: error', () => {
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .set('Accept', 'application/octet-stream')
+            .expect('Content-Type', 'application/octet-stream')
+            .expect(500)
+        );
+    });
+
     it('Error in formatter', () => {
 
       server.register('formatter', {

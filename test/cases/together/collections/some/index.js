@@ -6,7 +6,7 @@
 
 class Some {
   list() {
-    return 'bla bla bla';
+    return {foo: 'bla bla bla'};
   }
 }
 

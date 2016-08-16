@@ -1,6 +1,6 @@
 SOURCES = lib/**/*.js
 
-TESTS = test/lib/*.js test/lib/**/*.js
+TESTS = test/lib/*.js test/lib/**/*.js test/together.js
 
 all: lint test
 
@@ -22,11 +22,11 @@ endif
 
 test-cov:
 	@echo "Getting coverage report..."
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- $(TESTS) --recursive
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover -x "**/http/**" ./node_modules/.bin/_mocha -- $(TESTS) --recursive
 
 travis-cov:
 	@echo "Getting coverage for Travis..."
-	./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- $(TESTS) --recursive -R spec && ./node_modules/.bin/codecov
+	./node_modules/.bin/istanbul cover -x "**/http/**" ./node_modules/.bin/_mocha --report lcovonly -- $(TESTS) --recursive -R spec && ./node_modules/.bin/codecov
 
 clean:
 	rm -rf coverage
