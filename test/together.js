@@ -214,5 +214,5 @@ describe('Server test', () => {
             .expect(501)
         );
     });
-  })
+  });
 });
