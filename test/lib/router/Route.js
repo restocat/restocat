@@ -46,18 +46,17 @@ describe('lib/router/Route', () => {
     };
     const definedRoutes = {Index: '/'};
     const locator = createLocator(collections, definedRoutes);
-    const descriptor = {name: 'Index'};
     const handleName = 'foo';
     const endpoint = 'get /foo/:id/:param';
-    const route = new Route(locator, descriptor, handleName, endpoint);
+    const route = new Route(locator, {name: 'Index', constructor: collections.Index.constructor}, handleName, endpoint);
 
     return locator.resolve('collectionsLoader')
       .load()
       .then(() => {
         return route.handle(request(), null, null);
       })
-      .then(data => {
-        assert.equal(data.result, 'success');
+      .then(content => {
+        assert.equal(content, 'success');
       });
   });
 });
