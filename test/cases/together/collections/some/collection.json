@@ -1,1 +1,6 @@
-{}
+{
+  "endpointsDefault": false,
+  "endpoints": {
+    "get /": "list"
+  }
+}

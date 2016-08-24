@@ -1,6 +1,6 @@
 {
   "name": "restocat",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": {
     "name": "Maksim Chetverikov",
     "email": "ma.chetverikov@gmail.com"
@@ -26,7 +26,8 @@
     "test": "make"
   },
   "dependencies": {
-    "catberry-locator": "^2.1.0",
+    "bluebird": "^3.4.1",
+    "catberry-locator": "^2.2.0",
     "catberry-uri": "^3.1.0",
     "chokidar": "^1.5.0",
     "glob": "^7.0.3",

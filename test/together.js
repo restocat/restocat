@@ -48,7 +48,12 @@ describe('Server test', () => {
           supertest(server._httpServer)
             .get('/notImpl')
             .expect('Content-Type', 'application/json')
-            .expect(500)
+            .expect(501)
+            .expect(response => {
+              assert.strictEqual(response.body.name, 'NotImplementedError');
+              assert.strictEqual(response.body.status, 501);
+              assert.strictEqual(response.body.code, 'NotImplemented');
+            })
         );
     });
 
@@ -72,7 +77,8 @@ describe('Server test', () => {
             .get('/notImpl')
             .set('Accept', 'text/plain')
             .expect('Content-Type', 'text/plain')
-            .expect(500)
+            .expect(501)
+            .expect(response => assert.notEqual(response.text.indexOf('NotImplementedError'), -1))
         );
     });
 
@@ -96,12 +102,12 @@ describe('Server test', () => {
             .get('/notImpl')
             .set('Accept', 'application/octet-stream')
             .expect('Content-Type', 'application/octet-stream')
-            .expect(500)
+            .expect(501)
+            .expect(response => assert.notEqual(response.text.indexOf('NotImplementedError'), -1))
         );
     });
 
     it('Error in formatter', () => {
-
       server.register('formatter', {
         'text/html;q=0.9'() {
           throw Error('SomeError');
@@ -114,10 +120,8 @@ describe('Server test', () => {
           supertest(server._httpServer)
             .get('/')
             .expect(500)
-        )
-        .then(res => {
-          assert.notEqual(res.text.indexOf('SomeError'), -1);
-        });
+            .expect(response => assert.notEqual(response.text.indexOf('SomeError'), -1))
+        );
     });
 
     it('$context in formatter instanceOf Context', () => {
@@ -137,6 +141,7 @@ describe('Server test', () => {
           supertest(server._httpServer)
             .get('/')
             .expect(200)
+            .expect(response => assert.strictEqual(response.text, '{Foo: \'bar\'}'))
         );
     });
 
@@ -161,4 +166,53 @@ describe('Server test', () => {
       });
     });
   });
+
+  describe('notImplementedHandler', () => {
+    it('should response with 200 statusCode and "FOO!" content when set custom handler', () => {
+      server.register('notImplementedHandler', () => {
+        return 'FOO!';
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(200)
+            .expect(response => assert.notStrictEqual(response.text.indexOf('FOO!'), -1))
+        );
+    });
+
+    it('should response with 404 statusCode when set custom handler with rejected promise', () => {
+      server.register('notImplementedHandler', $context => {
+        const NotFound = $context.locator.resolve('errors').NotFoundError;
+
+        return Promise.reject(new NotFound());
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(404)
+        );
+    });
+
+    it('should response with 501 statusCode when set custom handler with throw exception', () => {
+      server.register('notImplementedHandler', $context => {
+        const NotImplementedError = $context.locator.resolve('errors').NotImplementedError;
+
+        throw new NotImplementedError();
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(501)
+        );
+    });
+  })
 });
