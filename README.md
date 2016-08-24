@@ -179,6 +179,24 @@ server.register('formatter', {
 
 ```
 
+# Not implemented handler (Not found)
+
+You can add your handler of the situation when the specified url was never found handler:
+
+```javascript
+
+const Restocat = require('restocat');
+const cat = new Restocat();
+const server = cat.createServer();
+
+server.register('notImplementedHandler', $context => {
+  const NotFound = $context.locator.resolve('errors').NotFoundError;
+  
+  return Promise.reject(new NotFound('Not found handler for current url'));
+});
+
+```
+
 # Request API (IncomingMessage)
 Wraps all of the node [http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage) APIs, events and properties, plus the following.
 
