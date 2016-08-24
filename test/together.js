@@ -108,7 +108,6 @@ describe('Server test', () => {
     });
 
     it('Error in formatter', () => {
-
       server.register('formatter', {
         'text/html;q=0.9'() {
           throw Error('SomeError');
@@ -167,4 +166,53 @@ describe('Server test', () => {
       });
     });
   });
+
+  describe('notImplementedHandler', () => {
+    it('should response with 200 statusCode and "FOO!" content when set custom handler', () => {
+      server.register('notImplementedHandler', () => {
+        return 'FOO!';
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(200)
+            .expect(response => assert.notStrictEqual(response.text.indexOf('FOO!'), -1))
+        );
+    });
+
+    it('should response with 404 statusCode when set custom handler with rejected promise', () => {
+      server.register('notImplementedHandler', $context => {
+        const NotFound = $context.locator.resolve('errors').NotFoundError;
+
+        return Promise.reject(new NotFound());
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(404)
+        );
+    });
+
+    it('should response with 501 statusCode when set custom handler with throw exception', () => {
+      server.register('notImplementedHandler', $context => {
+        const NotImplementedError = $context.locator.resolve('errors').NotImplementedError;
+
+        throw new NotImplementedError();
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(501)
+        );
+    });
+  })
 });
