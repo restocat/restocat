@@ -730,7 +730,7 @@ describe('lib/Watcher', () => {
 
       const onWatchReady = new Promise(fulfill => events.on('readyWatchers', fulfill));
       const onError = new Promise(fulfill => events.on('error', error => {
-        assert.notEqual(String(error).indexOf('Unexpected token ILLEGAL'), -1);
+        assert.notEqual(String(error).indexOf('SyntaxError'), -1);
         assert.equal(Object.keys(loader._loadedCollections).length, 0);
         fulfill();
       }));
