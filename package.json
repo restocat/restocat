@@ -38,10 +38,10 @@
   "devDependencies": {
     "codecov": "^1.0.1",
     "eslint": "^2.2.0",
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^1.0.0",
     "istanbul": "~0.4.2",
     "mocha": "^2.4.5",
-    "supertest": "^1.2.0"
+    "supertest": "^2.0.1"
   },
   "engines": {
     "node": ">=6"
