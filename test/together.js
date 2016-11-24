@@ -223,14 +223,14 @@ describe('Server test', () => {
               return reject('not found uuid');
             }
 
-            resolve()
+            return resolve();
           }
         });
 
         return server
           .listen()
-          .then(() =>supertest(server._httpServer).get('/'));
-      })
+          .then(() => supertest(server._httpServer).get('/'));
+      });
     });
   });
 });

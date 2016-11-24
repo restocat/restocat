@@ -95,8 +95,8 @@ describe('lib/router/Route', () => {
               route.handle({request: {uuid: helpers.uuid()}}, null, null)
             ])
             .then(() => {
-              assert.equal(uuids.filter((uuid, index, array) => array.indexOf(uuid) === index).length, 3)
-            })
+              assert.equal(uuids.filter((uuid, index, array) => array.indexOf(uuid) === index).length, 3);
+            });
 
         });
     });

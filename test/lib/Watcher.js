@@ -10,7 +10,9 @@ const CollectionsFinder = require('../../lib/finders/CollectionsFinder');
 const CollectionsLoader = require('../../lib/loaders/CollectionsLoader');
 const promisify = require('../../lib/helpers/promises').promisify;
 const Watcher = require('../../lib/Watcher');
-const RequestRouter = class {init() { return Promise.resolve()}};
+
+/* eslint brace-style:0 */
+const RequestRouter = class {init() { return Promise.resolve(); }};
 
 const copy = promisify(fs.copy);
 
@@ -127,7 +129,7 @@ describe('lib/Watcher', () => {
       const tmpPath = getTemporary(caseRoot);
       const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
       let reinit = false;
-      const RequestRouter = class {init() { reinit = true; return Promise.resolve()}};
+      const RequestRouter = class {init() { reinit = true; return Promise.resolve(); }};
 
       locator.register('requestRouter', RequestRouter, true);
       locator.registerInstance('config', {
