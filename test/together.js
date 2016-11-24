@@ -214,5 +214,23 @@ describe('Server test', () => {
             .expect(501)
         );
     });
+
+    it('should exists uuid in request', () => {
+      return new Promise((resolve, reject) => {
+        server.register('formatter', {
+          'text/html;q=0.9'($context) {
+            if (typeof $context.request.uuid !== 'string') {
+              return reject('not found uuid');
+            }
+
+            resolve()
+          }
+        });
+
+        return server
+          .listen()
+          .then(() =>supertest(server._httpServer).get('/'));
+      })
+    });
   });
 });
