@@ -10,6 +10,7 @@ const CollectionsFinder = require('../../lib/finders/CollectionsFinder');
 const CollectionsLoader = require('../../lib/loaders/CollectionsLoader');
 const promisify = require('../../lib/helpers/promises').promisify;
 const Watcher = require('../../lib/Watcher');
+const RequestRouter = class {init() { return Promise.resolve()}};
 
 const copy = promisify(fs.copy);
 
@@ -32,6 +33,7 @@ describe('lib/Watcher', () => {
     locator.registerInstance('events', new EventEmitter());
     locator.register('collectionsLoader', CollectionsLoader, true);
     locator.register('collectionsFinder', CollectionsFinder, true);
+    locator.register('requestRouter', RequestRouter, true);
     locator.register('watcher', Watcher, true);
 
     locator.registerInstance('config', {
@@ -62,6 +64,7 @@ describe('lib/Watcher', () => {
       locator.registerInstance('serviceLocator', locator);
       locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
+      locator.register('requestRouter', RequestRouter, true);
       locator.register('watcher', Watcher, true);
     });
 
@@ -86,6 +89,60 @@ describe('lib/Watcher', () => {
       const promiseAdd = new Promise(fulfill => {
         watcher.on('add', collection => {
           assert.equal(collection.name, collections[Object.keys(collections)[0]].name);
+          fulfill();
+        });
+      });
+
+      let collections;
+
+      return copyWithDelay(caseRoot, tmpPath)
+        .then(() => finder.find())
+        .then(found => {
+          collections = found;
+
+          assert.equal(Object.keys(collections).length, 1);
+
+          return watcher.watchCollectionJsonFiles();
+        })
+        .then(jsonWatcher => {
+          const collectionJsonContent = JSON.parse(fs.readFileSync(alreadyPath));
+          collectionJsonContent.timestamp = Date.now();
+
+          return Promise
+            .all([writeFile(alreadyPath, JSON.stringify(collectionJsonContent)), promiseAdd, promiseUnlink])
+            .then(() => jsonWatcher.close());
+        })
+        .then(() => remove(tmpPath))
+        .catch(reason => {
+          fs.removeSync(tmpPath);
+          throw reason;
+        });
+    });
+
+    /**
+     * Watcher emit unlink, add
+     */
+    it('should reinitialization routes after change collection.json', () => {
+      const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
+      const tmpPath = getTemporary(caseRoot);
+      const alreadyPath = path.join(tmpPath, 'already', 'test-collection.json');
+      let reinit = false;
+      const RequestRouter = class {init() { reinit = true; return Promise.resolve()}};
+
+      locator.register('requestRouter', RequestRouter, true);
+      locator.registerInstance('config', {
+        isRelease: true,
+        collectionsGlob: [
+          `${tmpPath}/**/test-collection.json`
+        ]
+      });
+
+      const finder = locator.resolve('collectionsFinder');
+      const watcher = locator.resolve('watcher');
+      const promiseUnlink = new Promise(fulfill => watcher.on('unlink', fulfill));
+      const promiseAdd = new Promise(fulfill => {
+        watcher.on('add', () => {
+          assert.equal(reinit, true);
           fulfill();
         });
       });
@@ -287,6 +344,7 @@ describe('lib/Watcher', () => {
       locator.registerInstance('serviceLocator', locator);
       locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
+      locator.register('requestRouter', RequestRouter, true);
       locator.register('watcher', Watcher, true);
     });
 
@@ -451,6 +509,7 @@ describe('lib/Watcher', () => {
       locator.registerInstance('events', new EventEmitter());
       locator.register('collectionsFinder', CollectionsFinder, true);
       locator.register('collectionsLoader', CollectionsLoader, true);
+      locator.register('requestRouter', RequestRouter, true);
       locator.register('watcher', Watcher, true);
     });
 
