@@ -350,11 +350,17 @@ describe('lib/Watcher', () => {
       locator.register('watcher', Watcher, true);
     });
 
-    it('should emit "change" collection after change "collection/index.js"', () => {
+    it('should emit "change" collection after change "collection/index.js and re-init Router"', () => {
       const caseRoot = 'test/cases/lib/finders/CollectionsFinder/watch';
       const tmpPath = getTemporary(caseRoot);
       const alreadyPath = path.join(tmpPath, 'already', 'index.js');
+      let RequestRouter = null;
 
+      const reinitPromise = new Promise(resolve => {
+        RequestRouter = class {init() { resolve(); return Promise.resolve(); }};
+      });
+
+      locator.register('requestRouter', RequestRouter, true);
       locator.registerInstance('config', {
         collectionsGlob: [
           `${tmpPath}/**/test-collection.json`
@@ -394,7 +400,7 @@ describe('lib/Watcher', () => {
           let collectionJsonContent = fs.readFileSync(alreadyPath).toString();
           collectionJsonContent = collectionJsonContent.replace(/blablabla/, 'foo');
 
-          return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise]);
+          return Promise.all([writeFile(alreadyPath, collectionJsonContent), promise, reinitPromise]);
         })
         .then(() => remove(tmpPath))
         .catch(reason => {
