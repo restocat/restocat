@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const supertest = require('supertest');
 const path = require('path');
