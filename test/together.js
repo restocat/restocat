@@ -27,6 +27,8 @@ describe('Server test', () => {
     server = restocat.createServer();
   });
 
+  afterEach(() => server.close());
+
   describe('Forrmatter', () => {
     it('JSON formatter', () => {
       return server
@@ -101,7 +103,7 @@ describe('Server test', () => {
             .set('Accept', 'application/octet-stream')
             .expect('Content-Type', 'application/octet-stream')
             .expect(501)
-            .expect(response => assert.notEqual(response.text.indexOf('NotImplementedError'), -1))
+            .expect(response => assert.notEqual(response.body.toString().indexOf('NotImplementedError'), -1))
         );
     });
 
