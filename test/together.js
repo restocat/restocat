@@ -14,7 +14,7 @@ describe('Server test', () => {
 
   let server = null;
 
-  beforeEach(() => {
+  beforeEach(done => {
     const Restocat = require('../lib/Restocat');
     const restocat = new Restocat({
       isRelease: true,
@@ -25,9 +25,11 @@ describe('Server test', () => {
     restocat.events.on('error', () => {});
 
     server = restocat.createServer();
+
+    done();
   });
 
-  afterEach(() => server.close());
+  afterEach(() => server.listening && server.close());
 
   describe('Forrmatter', () => {
     it('JSON formatter', () => {
