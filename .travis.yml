@@ -15,4 +15,5 @@ script:
   - npm run travis
 
 after_script:
+  - ls -la
   - codeclimate < coverage/**/lcov.info
