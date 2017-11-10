@@ -15,5 +15,4 @@ script:
   - npm run travis
 
 after_script:
-  - ls ./
-  - codeclimate < coverage/**/lcov.info
+  - codeclimate < ./coverage/**/lcov.info
