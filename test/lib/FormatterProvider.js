@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const ServiceLocator = require('catberry-locator');
 const FormatterProvider = require('../../lib/FormatterProvider');
