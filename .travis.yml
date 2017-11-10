@@ -8,3 +8,5 @@ sudo: false
 node_js:
   - "6"
   - "7"
+script:
+  - npm run travis

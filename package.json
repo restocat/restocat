@@ -23,7 +23,12 @@
     }
   ],
   "scripts": {
-    "test": "make"
+    "test": "mocha test/lib/*.js test/lib/**/*.js test/together.js",
+    "test-cov": "istanbul cover _mocha -- test/lib/*.js test/lib/**/*.js test/together.js",
+    "lint": "eslint lib/**/*.js test/lib/*.js test/lib/**/*.js test/together.js",
+    "lint-fix": "eslint lib/**/*.js test/lib/*.js test/lib/**/*.js test/together.js --fix",
+    "travis": "istanbul cover _mocha --report lcovonly -- test/lib/*.js test/lib/**/*.js test/together.js --recursive -R spec && codecov",
+    "clean": "rm -rf coverage"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
