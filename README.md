@@ -118,7 +118,6 @@ Here is a list of Restocat events:
 | warn | Warning message was sent | `String` |
 | error | Error message was sent | `String|Error` |
 | fatal | Fatal error message was sent | `String|Error` |
-| readyWatchers | Initial scan complete. Ready for changes | Array of [FSWatcher](https://github.com/paulmillr/chokidar#methods--events) |
 | collectionLoaded | each component is loaded | `{name: String, properties: Object, constructor: function}` |
 | allCollectionsLoaded | all components are loaded | Loaded components by their names |
 | incomingMessage | Request message | `IncomingMessage` |
