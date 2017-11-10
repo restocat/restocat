@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const EventEmitter = require('events').EventEmitter;
 const testCases = require('../../cases/lib/loaders/CollectionsLoader/test-cases.json');

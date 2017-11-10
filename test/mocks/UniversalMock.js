@@ -1,5 +1,3 @@
-'use strict';
-
 const events = require('events');
 
 class UniversalMock extends events.EventEmitter {

@@ -1,5 +1,3 @@
-'use strict';
-
 class Already {
   foo() {
     return 'blablabla';

@@ -6,10 +6,10 @@ all: lint test
 
 lint:
 	@echo "Running code quality tests..."
-	./node_modules/.bin/eslint $(SOURCES) $(TESTS)
+	eslint $(SOURCES) $(TESTS)
 
 lint-fix:
-	./node_modules/.bin/eslint $(SOURCES) $(TESTS) --fix
+	eslint $(SOURCES) $(TESTS) --fix
 
 test:
 ifeq ($(TRAVIS),true)
@@ -17,16 +17,17 @@ ifeq ($(TRAVIS),true)
 	$(MAKE) travis-cov
 else
 	@echo "Running tests..."
-	./node_modules/.bin/mocha $(TESTS) --recursive
+	mocha $(TESTS) --recursive
 endif
 
 test-cov:
 	@echo "Getting coverage report..."
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover -x "**/http/**" ./node_modules/.bin/_mocha -- $(TESTS) --recursive
+	@NODE_ENV=test istanbul cover _mocha -- $(TESTS) --recursive
 
 travis-cov:
 	@echo "Getting coverage for Travis..."
-	./node_modules/.bin/istanbul cover -x "**/http/**" ./node_modules/.bin/_mocha --report lcovonly -- $(TESTS) --recursive -R spec && ./node_modules/.bin/codecov
+	istanbul cover _mocha --report lcovonly -- $(TESTS) --recursive -R spec
+	codecov
 
 clean:
 	rm -rf coverage

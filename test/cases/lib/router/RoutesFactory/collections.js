@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   Index: {
     constructor: class Index {

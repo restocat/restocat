@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const supertest = require('supertest');
 const path = require('path');
@@ -16,7 +14,7 @@ describe('Server test', () => {
 
   let server = null;
 
-  beforeEach(() => {
+  beforeEach(done => {
     const Restocat = require('../lib/Restocat');
     const restocat = new Restocat({
       isRelease: true,
@@ -27,7 +25,11 @@ describe('Server test', () => {
     restocat.events.on('error', () => {});
 
     server = restocat.createServer();
+
+    done();
   });
+
+  afterEach(() => server.listening && server.close());
 
   describe('Forrmatter', () => {
     it('JSON formatter', () => {
@@ -103,7 +105,7 @@ describe('Server test', () => {
             .set('Accept', 'application/octet-stream')
             .expect('Content-Type', 'application/octet-stream')
             .expect(501)
-            .expect(response => assert.notEqual(response.text.indexOf('NotImplementedError'), -1))
+            .expect(response => assert.notEqual(response.body.toString().indexOf('NotImplementedError'), -1))
         );
     });
 
