@@ -1,5 +1,3 @@
-'use strict';
-
 const stream = require('stream');
 
 class HttpResponse extends stream.PassThrough {

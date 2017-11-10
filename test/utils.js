@@ -1,5 +1,3 @@
-'use strict';
-
 const testUtils = {
   wait: milliseconds => new Promise(fulfill => setTimeout(() => fulfill(), milliseconds))
 };

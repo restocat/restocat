@@ -1,6 +1,6 @@
 {
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 8
   },
   "env": {
     "browser": true,
@@ -77,8 +77,6 @@
     "no-new-require": 2,
     "no-path-concat": 2,
     "no-sync": 2,
-
-    "strict": [2, "global"],
 
     "complexity": [2, 10],
     "consistent-return": 2,
