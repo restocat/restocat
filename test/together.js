@@ -187,7 +187,7 @@ describe('Server test', () => {
 
     it('should response with 404 statusCode when set custom handler with rejected promise', () => {
       server.register('notImplementedHandler', $context => {
-        const NotFound = $context.locator.resolve('errors').NotFoundError;
+        const NotFound = $context.locator.resolve('httpErrors').NotFoundError;
 
         return Promise.reject(new NotFound());
       });
@@ -203,7 +203,7 @@ describe('Server test', () => {
 
     it('should response with 501 statusCode when set custom handler with throw exception', () => {
       server.register('notImplementedHandler', $context => {
-        const NotImplementedError = $context.locator.resolve('errors').NotImplementedError;
+        const NotImplementedError = $context.locator.resolve('httpErrors').NotImplementedError;
 
         throw new NotImplementedError();
       });

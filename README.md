@@ -189,7 +189,7 @@ const cat = new Restocat();
 const server = cat.createServer();
 
 server.register('notImplementedHandler', $context => {
-  const NotFound = $context.locator.resolve('errors').NotFoundError;
+  const NotFound = $context.locator.resolve('httpErrors').NotFoundError;
   
   return Promise.reject(new NotFound('Not found handler for current url'));
 });
