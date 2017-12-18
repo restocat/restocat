@@ -61,6 +61,18 @@ An example collection.json could look like this:
 }
 ```
 
+Also, you can set your list of the endpoints by default:
+
+```javascript
+
+locator.registerInstance('defaultEndpoints', {
+    'get /': 'list',
+    'post /': 'create',
+    'get /:id': 'one'
+})
+
+```
+
 # Context
 
 Restocat sets as the property `$context` for every instance of each `collection`.
@@ -232,9 +244,11 @@ Wraps all of the node [http.ServerResponse](https://nodejs.org/api/http.html#htt
 * send(code:Number, content:Object|Error|Buffer) - sends the response object. convenience method that handles: writeHead(), write(), end() 
 * setStatus(code:Number) - sets the http status code on the response
 
-Useful links
+Plugins and useful links
 ============
+* [Restocat Logger](https://github.com/restocat/restocat-logger)
+* [Restocat Watcher](https://github.com/restocat/restocat-watcher)
+
+* -------
 * [Example](https://github.com/restocat/restocat-example)
-* [Default Logger](https://github.com/restocat/restocat-logger)
-* [Catberry.js](https://github.com/catberry/catberry)
 
