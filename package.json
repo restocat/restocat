@@ -31,10 +31,8 @@
     "clean": "rm -rf coverage"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
     "catberry-locator": "^2.2.1",
     "catberry-uri": "^3.2.2",
-    "chokidar": "^1.7.0",
     "glob": "^7.1.2",
     "mime": "^2.0.3",
     "negotiator": "^0.6.1",
