@@ -61,6 +61,18 @@ An example collection.json could look like this:
 }
 ```
 
+Also, you can set your list of the endpoints by default:
+
+```javascript
+
+locator.registerInstance('defaultEndpoints', {
+    'get /': 'list',
+    'post /': 'create',
+    'get /:id': 'one'
+})
+
+```
+
 # Context
 
 Restocat sets as the property `$context` for every instance of each `collection`.
@@ -118,7 +130,6 @@ Here is a list of Restocat events:
 | warn | Warning message was sent | `String` |
 | error | Error message was sent | `String|Error` |
 | fatal | Fatal error message was sent | `String|Error` |
-| readyWatchers | Initial scan complete. Ready for changes | Array of [FSWatcher](https://github.com/paulmillr/chokidar#methods--events) |
 | collectionLoaded | each component is loaded | `{name: String, properties: Object, constructor: function}` |
 | allCollectionsLoaded | all components are loaded | Loaded components by their names |
 | incomingMessage | Request message | `IncomingMessage` |
@@ -190,7 +201,7 @@ const cat = new Restocat();
 const server = cat.createServer();
 
 server.register('notImplementedHandler', $context => {
-  const NotFound = $context.locator.resolve('errors').NotFoundError;
+  const NotFound = $context.locator.resolve('httpErrors').NotFoundError;
   
   return Promise.reject(new NotFound('Not found handler for current url'));
 });
@@ -233,9 +244,11 @@ Wraps all of the node [http.ServerResponse](https://nodejs.org/api/http.html#htt
 * send(code:Number, content:Object|Error|Buffer) - sends the response object. convenience method that handles: writeHead(), write(), end() 
 * setStatus(code:Number) - sets the http status code on the response
 
-Useful links
+Plugins and useful links
 ============
+* [Restocat Logger](https://github.com/restocat/restocat-logger)
+* [Restocat Watcher](https://github.com/restocat/restocat-watcher)
+
+* -------
 * [Example](https://github.com/restocat/restocat-example)
-* [Default Logger](https://github.com/restocat/restocat-logger)
-* [Catberry.js](https://github.com/catberry/catberry)
 
