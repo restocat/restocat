@@ -82,7 +82,7 @@ describe('lib/CollectionsFinder', () => {
       locator.registerInstance('config', {
         collectionsGlob: [
           `${caseRoot}/**/test-collection.json`,
-          `${caseRoot}/test-collection.json`,
+          `${caseRoot}/test-collection.json`
         ]
       });
 
