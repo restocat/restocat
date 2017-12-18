@@ -1,6 +1,7 @@
 const assert = require('assert');
 const EventEmitter = require('events').EventEmitter;
 const ServiceLocator = require('catberry-locator');
+const httpErrors = require('../../../lib/httpErrors');
 const ContextFactory = require('../../../lib/context/ContextFactory');
 const Route = require('../../../lib/router/Route');
 const CollectionLoader = require('../../mocks/loaders/CollectionsLoader');
@@ -30,6 +31,27 @@ describe('lib/router/Route', () => {
     assert.deepEqual(
       {id: 'bar', param: 'loop'},
       match
+    );
+  });
+
+  it('#init', () => {
+    const collections = {
+      Index: {
+        constructor: class Index {
+          list() {
+          }
+        }
+      }
+    };
+    const definedRoutes = {Index: '/'};
+    const locator = createLocator(collections, definedRoutes);
+    const descriptor = {name: 'Index'};
+    const handleName = 'foo';
+    const endpoint = '/foo/:id/:param';
+
+    assert.throws(
+      () => new Route(locator, descriptor, handleName, endpoint),
+      /Invalid endpoint/
     );
   });
 
@@ -97,6 +119,81 @@ describe('lib/router/Route', () => {
             });
 
         });
+    });
+
+    it('should throw exception when constructor invalid', async() => {
+      const collections = {
+        Index: {
+          constructor: 'I am a String'
+        }
+      };
+      const definedRoutes = {Index: '/'};
+      const locator = createLocator(collections, definedRoutes);
+      const handleName = 'foo';
+      const endpoint = 'get /foo/:id/:param';
+      const desc = {
+        name: 'Index',
+        constructor: collections.Index.constructor
+      };
+      const route = new Route(locator, desc, handleName, endpoint);
+
+      try {
+        await route.handle({locator});
+      } catch (error) {
+        assert.ok(error instanceof httpErrors.InternalServerError);
+      }
+    });
+
+    it('should throw exception when constructor throw exception', async() => {
+      const collections = {
+        Index: {
+          constructor: class {
+            constructor() {
+              throw new Error('Foo');
+            }
+          }
+        }
+      };
+      const definedRoutes = {Index: '/'};
+      const locator = createLocator(collections, definedRoutes);
+      const handleName = 'foo';
+      const endpoint = 'get /foo/:id/:param';
+      const desc = {
+        name: 'Index',
+        constructor: collections.Index.constructor
+      };
+      const route = new Route(locator, desc, handleName, endpoint);
+
+      try {
+        await route.handle({locator});
+      } catch (error) {
+        assert.ok(error instanceof Error);
+        assert.ok(error.message.includes('Foo'));
+      }
+    });
+
+    it('should throw exception when handle not found', async() => {
+      const collections = {
+        Index: {
+          constructor: class {}
+        }
+      };
+      const definedRoutes = {Index: '/'};
+      const locator = createLocator(collections, definedRoutes);
+      const handleName = 'foo';
+      const endpoint = 'get /foo/:id/:param';
+      const desc = {
+        name: 'Index',
+        constructor: collections.Index.constructor
+      };
+      const route = new Route(locator, desc, handleName, endpoint);
+
+      try {
+        await route.handle({locator});
+      } catch (error) {
+        assert.ok(error instanceof Error);
+        assert.ok(error.message.includes('Not found handler'));
+      }
     });
   });
 });
