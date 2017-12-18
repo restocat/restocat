@@ -217,6 +217,30 @@ describe('Server test', () => {
         );
     });
 
+    it('should call middlewares before notImplementedHandler', () => {
+      const middlewarePromise = new Promise(resolve => {
+        server.use((req, res, next) => {
+          resolve();
+          next();
+        });
+      });
+
+      server.register('notImplementedHandler', $context => {
+        const NotImplementedError = $context.locator.resolve('httpErrors').NotImplementedError;
+
+        throw new NotImplementedError();
+      });
+
+      return server
+        .listen()
+        .then(() =>
+          supertest(server._httpServer)
+            .get('/notImpl')
+            .expect(501)
+        )
+        .then(() => middlewarePromise);
+    });
+
     it('should exists uuid in request', () => {
       return new Promise((resolve, reject) => {
         server.register('formatter', {
