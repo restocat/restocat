@@ -246,6 +246,7 @@ Wraps all of the node [http.ServerResponse](https://nodejs.org/api/http.html#htt
 
 Plugins and useful links
 ============
+* [Restocat Passport](https://github.com/restocat/restocat-passport)
 * [Restocat Logger](https://github.com/restocat/restocat-logger)
 * [Restocat Watcher](https://github.com/restocat/restocat-watcher)
 
