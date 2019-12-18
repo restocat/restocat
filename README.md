@@ -6,8 +6,9 @@ Restocat
 [![codecov](https://codecov.io/gh/restocat/restocat/coverage.svg)](https://codecov.io/gh/restocat/restocat)
 [![Codeclimate](https://codeclimate.com/github/restocat/restocat/badges/gpa.svg)](https://codeclimate.com/github/restocat/restocat)
 
-
-Restocat is a framework for quickly create REST APIs
+<p align="center">
+  <img src="https://raw.githubusercontent.com/restocat/restocat/master/docs/images/logo_full_wide.png">
+</p>
 
 # TL;DR
 
@@ -30,8 +31,8 @@ Each collection is declared as a directory with the collection.json file by defa
 The collection.json file consists of following:
 
 * name – the name of the collection (optional). By default, this is the name of the directory. Please keep in mind that a parameter's name in a route definition must satisfy the regular expression /^[\w-]+$/i
-* logic – a relative path to the file that exports a class or a constructor function for the component's logic object (optional). By default, index.js will be used.
-* endpointDefault – a relative path to the file that exports a class or a constructor function for the component's logic object (optional). By default - `true`
+* logic – a relative path to the file that exports a class or a constructor function for the collection's logic object (optional). By default, index.js will be used.
+* endpointDefault – a relative path to the file that exports a class or a constructor function for the collection's logic object (optional). By default - `true`
 * endpoints – map of the relationship between the route and handler (optional). By default:
 
 ```javascript
@@ -107,7 +108,7 @@ const Restocat = require('restocat');
 const restocat = new Restocat();
 
 restocat.events.on('error', error => {
-	// some action
+    // some action
 });
 ```
 
@@ -115,23 +116,23 @@ restocat.events.on('error', error => {
 
 ```javascript
 this.$context.on('error', error => {
-	// some action
+    // some action
 });
 ```
 
 ## Event names and arguments
 Here is a list of Restocat events:
 
-| Event					| When happens									| Arguments																									|
+| Event | When happens | Arguments |
 |---------------|-------------------------------|-----------------------------------------------------------|
 | trace | Trace message was sent | `String` |
 | debug | Debug message was sent | `String` |
 | info | Information message was sent | `String` |
 | warn | Warning message was sent | `String` |
-| error | Error message was sent | `String|Error` |
-| fatal | Fatal error message was sent | `String|Error` |
-| collectionLoaded | each component is loaded | `{name: String, properties: Object, constructor: function}` |
-| allCollectionsLoaded | all components are loaded | Loaded components by their names |
+| error | Error message was sent | `String \ Error` |
+| fatal | Fatal error message was sent | `String \ Error` |
+| collectionLoaded | each collection is loaded | `{name: String, properties: Object, constructor: function}` |
+| allCollectionsLoaded | all collections are loaded | Loaded collections by their names |
 | incomingMessage | Request message | `IncomingMessage` |
 | responseServer | Response server | `ResponseServer`, `IncomingMessage` |
 
@@ -250,6 +251,6 @@ Plugins and useful links
 * [Restocat Logger](https://github.com/restocat/restocat-logger)
 * [Restocat Watcher](https://github.com/restocat/restocat-watcher)
 
-* -------
+
 * [Example](https://github.com/restocat/restocat-example)
 
