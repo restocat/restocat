@@ -36,15 +36,15 @@
     "glob": "^7.1.2",
     "mime": "^2.0.3",
     "negotiator": "^0.6.1",
-    "path-to-regexp": "^2.1.0"
+    "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
     "codecov": "^3.0.0",
-    "eslint": "^4.10.0",
-    "fs-extra": "^4.0.2",
+    "eslint": "^6.7.2",
+    "fs-extra": "^8.1.0",
     "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^4.0.1",
-    "supertest": "^3.0.0"
+    "mocha": "^6.2.2",
+    "supertest": "^4.0.2"
   },
   "engines": {
     "node": ">=8"
