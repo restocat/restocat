@@ -1,9 +1,7 @@
 const assert = require('assert');
-const fs = require('fs-extra');
 const path = require('path');
 const events = require('events');
 const ServiceLocator = require('catberry-locator');
-const utils = require('../../utils');
 const CollectionFinder = require('../../../lib/finders/CollectionsFinder');
 const cwd = process.cwd();
 
